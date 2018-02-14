@@ -1,10 +1,10 @@
-# blog
+# Blog-with-vue
 
-> A Vue.js project
+> 一个前端基于 vue，后端基于 express 的简约博客。
 
 ## Build Setup
 
-``` bash
+```bash
 # install dependencies
 npm install
 
