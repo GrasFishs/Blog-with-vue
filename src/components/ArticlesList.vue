@@ -6,7 +6,12 @@
         :key="article._id">
         <div class="header">
           <router-link class="title"
-            :to="{name:'article',params:{tag:article.tag,id:article._id}}">
+            :to="{
+              name:'article',
+              params:{
+                tag:article.tag,
+                id:article._id,
+              }}">
             {{article.title}}
           </router-link>
           <Tag :tag="article.tag"/>

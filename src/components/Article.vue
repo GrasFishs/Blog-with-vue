@@ -11,7 +11,7 @@
         <div class="content" v-html="item.content" v-markdown="'page'"></div>
         <div class="like-button" @click="like">
           <span>喜欢</span>
-          <span class="far fa-heart"></span>
+          <span :class="[likeState?'far fa-heart':'fa fa-heart']"></span>
           <span>({{item.like}})</span>
         </div>
       </div>
@@ -28,20 +28,20 @@ export default {
     };
   },
   mounted() {
-    this.fetchData();
+    /**当前页面 */
+    const id = this.$route.params.id;
+    this.fetchData(id);
   },
 
   methods: {
-    fetchData: function() {
+    fetchData: function(id) {
       const self = this;
-      const id = this.$route.params.id;
       this.$http.get("/api/article/" + id).then(res => {
         self.list = [];
         self.list.push(res.data);
       });
     },
     like: function() {
-      const self = this;
       const id = this.$route.params.id;
       if (this.likeState === 0) {
         this.list[0].like += 1;
@@ -68,22 +68,22 @@ export default {
   align-items: center;
   margin: 0px;
   padding: 0px;
-}
 
-li {
-  margin-right: 20px;
-}
+  li {
+    margin-right: 20px;
 
-.date {
-  color: rgb(94, 177, 224);
-}
+    &.date {
+      color: rgb(94, 177, 224);
+    }
 
-.like {
-  color: #ea6f5a;
-}
+    &.like {
+      color: #ea6f5a;
+    }
 
-.view {
-  color: gray;
+    &.view {
+      color: gray;
+    }
+  }
 }
 
 .like-button {
@@ -102,6 +102,19 @@ li {
   }
   & span {
     margin: 0px 5px;
+  }
+}
+
+.pageChange {
+  display: flex;
+  justify-content: space-between;
+
+  $margin: 50px;
+  .prev {
+    margin-left: $margin;
+  }
+  .next {
+    margin-right: $margin;
   }
 }
 </style>
