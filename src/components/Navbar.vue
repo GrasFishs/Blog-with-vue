@@ -3,9 +3,9 @@
   <router-link to="/">
     <div class="info">
       <div class="title">{{title}}</div>
-      <div class="avatar">
+      <router-link :to="{name:'admin'}" class="avatar">
         <img src="../assets/grasfish.svg" alt="avatar">
-      </div>
+      </router-link>
       <div class="other">
       </div>
     </div>

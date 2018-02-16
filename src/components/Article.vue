@@ -1,6 +1,6 @@
 <!-- 文章的细节 -->
 <template>
-  <div>
+  <div class="article">
       <div v-for="(item,index) of list" :key="index">
         <h1 class="title">{{item.title}}</h1>
         <ul class="info">
@@ -8,7 +8,7 @@
             <li class="like"><i class="far fa-heart"></i>({{item.like}})</li>
             <li class="view"><i class="fa fa-eye"></i>({{item.view}})</li>
         </ul>
-        <div class="content" v-html="item.content" v-markdown="'page'"></div>
+        <div class="content" v-html="content"></div>
         <div class="like-button" @click="like">
           <span>喜欢</span>
           <span :class="[likeState?'far fa-heart':'fa fa-heart']"></span>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { markdown } from "../directives/markdown";
+import marked from "marked";
 export default {
   data() {
     return {
@@ -31,6 +31,11 @@ export default {
     /**当前页面 */
     const id = this.$route.params.id;
     this.fetchData(id);
+  },
+  computed: {
+    content: function() {
+      return marked(this.list[0].content);
+    }
   },
 
   methods: {
@@ -57,51 +62,53 @@ export default {
 };
 </script>
 <style lang='scss' scoped>
-.title {
-  margin: 10px 0px;
-}
+.article {
+  .title {
+    margin: 10px 0px;
+  }
 
-.info {
-  list-style: none;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin: 0px;
-  padding: 0px;
+  .info {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0px;
+    padding: 0px;
 
-  li {
-    margin-right: 20px;
+    li {
+      margin-right: 20px;
 
-    &.date {
-      color: rgb(94, 177, 224);
-    }
+      &.date {
+        color: rgb(94, 177, 224);
+      }
 
-    &.like {
-      color: #ea6f5a;
-    }
+      &.like {
+        color: #ea6f5a;
+      }
 
-    &.view {
-      color: gray;
+      &.view {
+        color: gray;
+      }
     }
   }
-}
 
-.like-button {
-  margin: 0px auto;
-  width: 150px;
-  height: 50px;
-  background: #f78585;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.2s all ease;
+  .like-button {
+    margin: 0px auto;
+    width: 150px;
+    height: 50px;
+    background: #f78585;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s all ease;
 
-  &:hover {
-    background: #ea6f5a;
-  }
-  & span {
-    margin: 0px 5px;
+    &:hover {
+      background: #ea6f5a;
+    }
+    & span {
+      margin: 0px 5px;
+    }
   }
 }
 

@@ -9,7 +9,9 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const FriendlyErrorsPlugin = require("friendly-errors-webpack-plugin");
 const portfinder = require("portfinder");
-const app = require("express");
+const app = require("express")();
+var bodyParser = require("body-parser");
+var multer = require("multer");
 const db = require("./db");
 
 const HOST = process.env.HOST;
@@ -52,6 +54,9 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       poll: config.dev.poll
     },
     before(app) {
+      app.use(bodyParser.json()); // for parsing application/json
+      app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+      app.use(multer()); // for parsing multipart/form-data
       /**
        * 获取所有的文章列表
        */

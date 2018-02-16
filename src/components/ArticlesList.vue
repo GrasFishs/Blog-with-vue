@@ -17,7 +17,7 @@
           <Tag :tag="article.tag"/>
         </div>
         <div class="body">
-          <div class="content" v-html="article.content"></div>
+          <div class="content" v-markdown="'card'">{{article.content}}</div>
         </div>
         <div class="footer">
           <div class="date"><i class="icon far fa-clock"></i>{{article.date}}</div>
@@ -43,45 +43,27 @@ export default {
   },
   watch: {
     $route(to, from) {
-      this.get();
-      this.getAll();
+      this.fetchData();
       document.body.scrollTop = document.documentElement.scrollTop = 0;
     }
   },
   methods: {
-    save: function() {
-      let self = this;
-      const article = {
-        title: this.title,
-        content: this.content,
-        date: new Date(),
-        like: 0,
-        view: 0
-      };
-      this.$http
-        .post("/api/saveArticle", {
-          article: article
-        })
-        .then(res => {
-          self.state = res.data;
-        });
-    },
-    get: function() {
+    fetchData: function() {
       const self = this;
       let tag = this.$route.params.tag;
       if (tag === "main") {
         this.$http.get("/api/articleList").then(res => {
-          self.articles = res.data;
+          self.articles = res.data.reverse();
         });
       } else {
         this.$http.get("/api/articleList/" + tag).then(res => {
-          self.articles = res.data;
+          self.articles = res.data.reverse();
         });
       }
     }
   },
   mounted() {
-    this.get();
+    this.fetchData();
   }
 };
 </script>
