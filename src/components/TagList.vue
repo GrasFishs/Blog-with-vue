@@ -1,9 +1,9 @@
 <!--  -->
 <template>
   <div class="tagList">
-    <span class="tag" v-for="tag of tags" :key="tag">
+    <div class="tag" v-for="tag of tags" :key="tag">
       <Tag :tag="tag" />
-    </span>
+    </div>
   </div>
 </template>
 
@@ -32,12 +32,13 @@ export default {
 </script>
 <style lang='scss' scoped>
 .tagList {
-  margin: 10px;
-}
-.tag {
-  margin-right: 10px;
-  &:last-child {
-    margin-right: 0px;
+  .tag {
+    display: inline-block;
+    margin: 5px;
+    margin-right: 10px;
+    &:last-child {
+      margin-right: 0px;
+    }
   }
 }
 </style>

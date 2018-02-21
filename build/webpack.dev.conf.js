@@ -57,6 +57,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       app.use(bodyParser.json()); // for parsing application/json
       app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
       app.use(multer()); // for parsing multipart/form-data
+
       /**
        * 获取所有的文章列表
        */

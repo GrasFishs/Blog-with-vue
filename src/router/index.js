@@ -3,18 +3,19 @@ import Router from "vue-router";
 import HelloWorld from "@/components/HelloWorld";
 import ArticleList from "../components/ArticlesList.vue";
 import Article from "../components/Article.vue";
-import Admin from '../components/Admin.vue';
+import Admin from "../components/Admin.vue";
+import Login from "../components/Login.vue";
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: "/",
-      redirect: "/main"
+      redirect: "/articles/main"
     },
     {
-      path: "/:tag",
+      path: "/articles/:tag",
       name: "ArticleList",
       component: ArticleList
     },
@@ -24,9 +25,19 @@ export default new Router({
       component: Article
     },
     {
-      path:'/admin',
-      name:'admin',
-      component:Admin
+      path: "/admin",
+      name: "admin",
+      component: Admin,
+      meta: {
+        requireAuth: true
+      }
+    },
+    {
+      path: "/login",
+      name: "login",
+      component: Login
     }
   ]
 });
+
+export default router;

@@ -12,7 +12,7 @@
             <li class="like"><i class="far fa-heart"></i>({{item.like}})</li>
             <li class="view"><i class="fa fa-eye"></i>({{item.view}})</li>
           </ul>
-          <div class="content" v-html="content"></div>
+          <div class="content" v-markdown="'page'" v-html="content"></div>
           <div class="like-button" @click="like">
             <span>喜欢</span>
             <span :class="[likeState?'far fa-heart':'fa fa-heart']"></span>
