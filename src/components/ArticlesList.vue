@@ -1,7 +1,11 @@
 <template>
   <div class="articles">
     <TagList/>
-    <div class="page" 
+    <div class="not-load" v-if="!loaded">
+      <Loading/>
+    </div>
+    <div v-if="loaded">
+      <div class="page" 
         v-for="article of articles"
         :key="article._id">
         <div class="header">
@@ -25,21 +29,29 @@
           <div class="view"><i class="icon fa fa-eye"></i>{{article.view}}</div>
         </div>
     </div>
+    </div>
   </div>
 </template>
 
 <script>
 import Tag from "./Tag";
 import TagList from "./TagList";
+import Loading from "./Loading";
 export default {
   components: {
     Tag,
-    TagList
+    TagList,
+    Loading
   },
   data() {
     return {
       articles: []
     };
+  },
+  computed: {
+    loaded: function() {
+      return this.articles.length !== 0;
+    }
   },
   watch: {
     $route(to, from) {
@@ -49,17 +61,20 @@ export default {
   },
   methods: {
     fetchData: function() {
+      this.articles = [];
       const self = this;
       let tag = this.$route.params.tag;
-      if (tag === "main") {
-        this.$http.get("/api/articleList").then(res => {
-          self.articles = res.data.reverse();
-        });
-      } else {
-        this.$http.get("/api/articleList/" + tag).then(res => {
-          self.articles = res.data.reverse();
-        });
-      }
+      setTimeout(() => {
+        if (tag === "main") {
+          this.$http.get("/api/articleList").then(res => {
+            self.articles = res.data.reverse();
+          });
+        } else {
+          this.$http.get("/api/articleList/" + tag).then(res => {
+            self.articles = res.data.reverse();
+          });
+        }
+      }, 600);
     }
   },
   mounted() {
@@ -95,13 +110,13 @@ export default {
     justify-content: space-between;
     align-items: center;
     .title {
-      font-size: 1.5em;
+      font-size: 1.2em;
+      text-overflow: ellipsis;
     }
 
     .tag {
       //background: #f6013f;
       color: #fff;
-      padding: 4px 10px;
     }
   }
   .body {
@@ -115,6 +130,11 @@ export default {
       -webkit-box-orient: vertical;
       text-overflow: ellipsis;
       color: #2c3e50;
+
+      &::selection {
+        background: #f6013f;
+        color: white;
+      }
     }
   }
   .footer {

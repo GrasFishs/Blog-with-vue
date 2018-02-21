@@ -1,7 +1,7 @@
 import Vue from "vue";
 import marked from "marked";
 import highlight from "highlight.js";
-import "../directives/atom-one-light.css";
+import './atom-one-light.css'
 
 const insertAfter = function(newEle, tarEle) {
   const parent = tarEle.parentNode;

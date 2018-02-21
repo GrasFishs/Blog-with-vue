@@ -90,10 +90,9 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           const article = new db.Article(req.body.article);
           article.save(function(err, doc) {
             if (err) {
-              res.send("提交失败");
-              console.log("save article error:" + err);
+              res.send(err);
             } else {
-              res.send("save article" + req.body.article.title + "success");
+              res.sendStatus(200);
             }
           });
         }),
@@ -108,11 +107,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
             function(err, docs) {
               db.Article.update(
                 { _id: req.params.id },
-                { view: docs.view + 1 },
-                function(err) {
-                  if (err) console.log(docs.title + " 浏览量更新失败 " + err);
-                  else console.log(docs.title + " 浏览量为 " + docs.view);
-                }
+                { view: docs.view + 1 }
               );
               if (err) return;
               res.send(docs);
@@ -132,11 +127,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
               docs.like++;
               db.Article.update(
                 { _id: req.params.id },
-                { like: docs.like },
-                function(err) {
-                  if (err) console.log(docs.title + " 点赞失败 " + err);
-                  else console.log(docs.title + " 点赞量为 " + docs.like);
-                }
+                { like: docs.like }
               );
               if (err) return;
             }
@@ -152,10 +143,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
               db.Article.update(
                 { _id: req.params.id },
                 { like: docs.like },
-                function(err) {
-                  if (err) console.log(docs.title + " 消赞失败 " + err);
-                  else console.log(docs.title + " 点赞量为 " + docs.like);
-                }
               );
               if (err) return;
             }

@@ -1,18 +1,23 @@
 <!-- 文章的细节 -->
 <template>
   <div class="article">
-      <div v-for="(item,index) of list" :key="index">
-        <h1 class="title">{{item.title}}</h1>
-        <ul class="info">
+      <div v-if="!loaded">
+        <Loading/>
+      </div>
+      <div v-if="loaded">
+        <div v-for="(item,index) of list" :key="index">
+          <h1 class="title">{{item.title}}</h1>
+          <ul class="info">
             <li class="date"><i class="far fa-clock"></i>{{item.date}}</li>
             <li class="like"><i class="far fa-heart"></i>({{item.like}})</li>
             <li class="view"><i class="fa fa-eye"></i>({{item.view}})</li>
-        </ul>
-        <div class="content" v-html="content"></div>
-        <div class="like-button" @click="like">
-          <span>喜欢</span>
-          <span :class="[likeState?'far fa-heart':'fa fa-heart']"></span>
-          <span>({{item.like}})</span>
+          </ul>
+          <div class="content" v-html="content"></div>
+          <div class="like-button" @click="like">
+            <span>喜欢</span>
+            <span :class="[likeState?'far fa-heart':'fa fa-heart']"></span>
+            <span>({{item.like}})</span>
+          </div>
         </div>
       </div>
   </div>
@@ -20,7 +25,11 @@
 
 <script>
 import marked from "marked";
+import Loading from "./Loading";
 export default {
+  components: {
+    Loading
+  },
   data() {
     return {
       list: [],
@@ -35,16 +44,21 @@ export default {
   computed: {
     content: function() {
       return marked(this.list[0].content);
+    },
+    loaded: function() {
+      return this.list.length !== 0;
     }
   },
 
   methods: {
     fetchData: function(id) {
-      const self = this;
-      this.$http.get("/api/article/" + id).then(res => {
-        self.list = [];
-        self.list.push(res.data);
-      });
+      setTimeout(() => {
+        const self = this;
+        this.$http.get("/api/article/" + id).then(res => {
+          self.list = [];
+          self.list.push(res.data);
+        });
+      }, 500);
     },
     like: function() {
       const id = this.$route.params.id;
@@ -91,7 +105,6 @@ export default {
       }
     }
   }
-
   .like-button {
     margin: 0px auto;
     width: 150px;
