@@ -4,6 +4,7 @@ import HelloWorld from "@/components/HelloWorld";
 import ArticleList from "../components/ArticlesList.vue";
 import Article from "../components/Article.vue";
 import Admin from "../components/Admin.vue";
+import Ediotr from "../components/Editor.vue";
 import Login from "../components/Login.vue";
 
 Vue.use(Router);
@@ -36,6 +37,11 @@ const router = new Router({
       path: "/login",
       name: "login",
       component: Login
+    },
+    {
+      path: "/admin/editor",
+      name: "editor",
+      component: Ediotr
     }
   ]
 });

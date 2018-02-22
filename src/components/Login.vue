@@ -22,12 +22,22 @@ export default {
   computed: {},
   methods: {
     login() {
-      if (this.name === "admin" && this.pwd === "gotoAnd123") {
-        this.$store.state.user.status = 1;
-        this.$router.push({ name: "admin" });
-      } else {
-        alert("账户密码不正确");
-      }
+      this.$http
+        .post("/login", {
+          username: this.name,
+          password: this.pwd
+        })
+        .then(res => {
+          /** status:'OK' or 'BAD' */
+          const status = res.data;
+          console.log(status);
+          if (status === "OK") {
+            this.$store.state.user.status = 1;
+            this.$router.push({ name: "admin" });
+          } else {
+            alert("账号密码不正确");
+          }
+        });
     }
   }
 };
@@ -55,7 +65,8 @@ $stickyHeight: 75px;
 
     margin-top: -100px;
 
-    input,button {
+    input,
+    button {
       background: #eee;
       box-sizing: border-box;
       border: none;
@@ -68,7 +79,7 @@ $stickyHeight: 75px;
         outline: none;
       }
     }
-    button{
+    button {
       background: #f6013f;
       color: white;
     }

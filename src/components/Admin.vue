@@ -1,234 +1,203 @@
-<!-- 编辑 -->
+<!-- 管理界面 -->
 <template>
   <div class="admin">
-    <div class="info">
-      <div class="title">
-        <input type="text" v-model="title" v-focus>
-      </div>
-      <div class="tagSelector">
-        <div class="tag" 
-              v-for="tag of tags" 
-              :key="tag.name"
-              :class="tag.select?'select':''"
-              @click="select(tag)">
-          {{tag.name}}
+    <div class="data">
+      <div class="card">
+        <div class="likes">
+          <i class="fas fa-heart"></i>
+          <Countup :end="likes" :duration="4"/>
         </div>
       </div>
+    <div class="card">
+      <div class="views">
+        <i class="fa fa-eye"></i>
+        <Countup :end="views" :duration="5"/>
+      </div>
     </div>
-    <div class="content">
-      <textarea class="edit" v-model="content"></textarea>
-      <div class="show" v-html="markdown"></div>
     </div>
-    <div class="save">
-      <button @click="save">提交</button>
-    </div>
-    <div class="state">{{state}}</div>
+    <table>
+      <thead>
+        <tr>
+          <th>标题</th>
+          <th>标签</th>
+          <th>日期</th>
+          <th>点赞</th>
+          <th>访问量</th>
+          <th>编辑</th>
+          <th>删除</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(article,i) of articles" :key="i">
+          <td>{{article.title}}</td>
+          <td><Tag :tag="article.tag"/></td>
+          <td>{{article.date}}</td>
+          <td>{{article.like}}</td>
+          <td>{{article.view}}</td>
+          <td>
+            <div @click="edit(article)">
+              <i class="fas fa-pencil-alt"></i>
+            </div>
+          </td>
+          <td>
+            <div @click="remove(article._id)">
+              <i class="fas fa-trash-alt"></i>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="7">
+            <div class="addArticle">
+              <button @click="addArticle">添加文章</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script>
-import marked from "marked";
 import Tag from "./Tag";
-
-const tagsList = [
-  "javscript",
-  "react",
-  "vue",
-  "css",
-  "html",
-  "python",
-  "angular",
-  "java",
-  "other"
-];
-const tags = tagsList.map(tag => {
-  if (tag === "other") {
-    return {
-      name: tag,
-      select: true
-    };
-  } else {
-    return { name: tag, select: false };
-  }
-});
+import Countup from "./Countup";
 export default {
-  components: {
-    Tag
-  },
   data() {
     return {
-      tags: tags,
-      title: new Date().toLocaleDateString(),
-      tag: "",
-      content: "",
-      state: "",
-      w: ""
+      articles: []
     };
   },
-  directives: {
-    focus: {
-      inserted: function(el) {
-        el.focus();
-      }
-    }
+  components: {
+    Tag,
+    Countup
   },
   computed: {
-    markdown: function() {
-      return marked(this.content);
+    likes: function() {
+      if (this.articles.length !== 0) {
+        return this.articles
+          .map(i => i.like)
+          .reduce((total, cur) => total + cur);
+      } else {
+        return 0;
+      }
     },
-    wordCount: function() {
-      // todo 还需改善
-      return this.content.replace(/(\s|\*|\>|\#|)/gi, "").length || 0;
+    views: function() {
+      if (this.articles.length !== 0) {
+        return this.articles
+          .map(i => i.view)
+          .reduce((total, cur) => total + cur);
+      } else {
+        return 0;
+      }
     }
   },
+  created() {
+    this.fetchData();
+  },
+
   methods: {
-    save: function() {
-      let self = this;
-      if (!this.title || !this.content) {
-        alert("不能为空");
-        return;
-      }
-      const postarticle = {
-        title: this.title,
-        content: this.content,
-        tag: this.tag || "other",
-        date: new Date(),
-        like: 0,
-        view: 0
-      };
-      this.$http
-        .post("/api/saveArticle", {
-          article: postarticle
-        })
-        .then(res => {
-          self.state = res.data;//return 'OK'
-        });
+    fetchData() {
+      this.$http.get("/api/articleList").then(res => {
+        this.articles = res.data;
+      });
     },
-    select: function(tag) {
-      this.tag = tag.name;
-      const newTags = [];
-      for (const i_tag of tagsList) {
-        if (i_tag === tag.name) {
-          newTags.push({
-            name: i_tag,
-            select: true
-          });
-        } else {
-          newTags.push({
-            name: i_tag,
-            select: false
-          });
-        }
+    edit(article) {
+      this.$store.state.article = article;
+      this.$router.push({ name: "editor" });
+    },
+    addArticle() {
+      this.$store.state.article = {};
+      this.$router.push({ name: "editor" });
+    },
+    remove(id) {
+      const del = confirm("确定删除吗？");
+      if (del) {
+        this.$http.get("/api/remove/" + id).then(res => {
+          alert(JSON.stringify(res.data));
+          this.fetchData();
+        });
       }
-      this.tags = newTags;
     }
   }
 };
 </script>
 <style lang='scss' scoped>
-textarea {
-  font-family: "Monaco", courier, monospace;
-  border: none;
-  resize: none;
-  outline: none;
-  color: #f6f6f6;
-  background-color: #272822;
-  font-size: 14px;
+.data {
+  display: flex;
+  flex-direction: row;
+  .card {
+    width: 50%;
+    height: 175px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+
+    .likes {
+      color: #f6013f;
+    }
+    .views {
+      color: rgb(59, 120, 167);
+    }
+    .views,
+    .likes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 2em;
+    }
+  }
 }
-.admin {
-  padding: 10px;
-  .info {
-    .title {
-      width: 80%;
-      input {
-        width: 100%;
-        height: 35px;
-        font-size: 1.5em;
-        padding: 10px;
-        background: white;
-        border: 1px solid #ccc;
-        color: #555;
-        transition: 0.25s all ease;
-        &:focus {
-          outline: none;
-          border: 1px solid lightblue;
-          box-shadow: 0 0 5px lightblue;
-        }
-      }
+
+.addArticle {
+  button {
+    background: #f6013f;
+    width: 100px;
+    height: 50px;
+    border: none;
+    transition: 0.5s all cubic-bezier(0.9, -0.35, 0.29, 1.54);
+    line-height: 50px;
+    text-align: center;
+    color: white;
+    text-overflow: ellipsis;
+
+    &:hover {
+      border-radius: 25%/50%;
     }
-    .tagSelector {
-      .tag {
-        display: inline-block;
-        background: #eee;
-        color: #ffb5c7;
-        transition: 0.2s all ease;
-        box-sizing: content-box;
-        margin: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
-        &:first-child {
-          margin-left: 0px;
-        }
-        &:hover {
-          //transform: scale(1.1);
-          transform: translateY(-5%);
-          background: #f6013f;
-          color: #eee;
-        }
-        &.select {
-          background: #f6013f;
-          color: #eee;
-        }
-      }
+
+    &:focus {
+      outline: none;
     }
   }
-  .content {
-    border: 1px solid #eee;
-    height: 600px;
-    .edit,
-    .show {
-      display: inline-block;
-      width: 49%;
-      height: 100%;
-      vertical-align: top;
-      box-sizing: border-box;
-      padding: 20px;
-      overflow-wrap: break-word;
-      overflow: auto;
-
-      &::-webkit-scrollbar {
-        width: 4px;
-        height: 4px;
-
-        &-thumb {
-          background: rgba($color: #f6013f, $alpha: 0.8);
-        }
-        &-track {
-          background: rgba($color: #f6013f, $alpha: 0.2);
-        }
-      }
+}
+table,
+table tr th,
+table tr td {
+  border: 1px solid rgba(246, 1, 63, 0.2);
+}
+table {
+  width: 100%;
+  text-align: center;
+  border-collapse: collapse;
+  tr {
+    cursor: pointer;
+  }
+  thead {
+    background: #f6013f;
+    color: white;
+    th {
+      padding: 10px;
     }
   }
-  .save {
-    button {
-      background: #f6013f;
-      width: 50px;
-      height: 50px;
-      border: none;
-      //border-radius: 50%;
-      transition: 0.5s all cubic-bezier(0.9, -0.35, 0.29, 1.54);
-      line-height: 50px;
-      text-align: center;
-      color: white;
-      text-overflow: ellipsis;
-
+  tbody {
+    tr {
+      transition: 0.1s all ease;
       &:hover {
-        width: 200px;
-        border-radius: 12.5%/50%;
+        background: rgba(246, 1, 63, 0.2);
+        color: white;
       }
 
-      &:focus {
-        outline: none;
+      td {
+        padding: 5px 10px;
       }
     }
   }

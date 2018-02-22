@@ -85,15 +85,45 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           );
         }),
         /**
+         * 登录
+         */
+        app.post("/login", function(req, res) {
+          const un = req.body.username;
+          const pwd = req.body.password;
+          if (un === "grasfish" && pwd === "gotoAnd123") {
+            res.send("OK");
+          } else {
+            res.send("BAD");
+          }
+        }),
+        /**
          * 上传文章
          */
         app.post("/api/saveArticle", function(req, res) {
           const article = new db.Article(req.body.article);
-          article.save(function(err, doc) {
-            if (err) {
-              res.send(err);
+          db.Article.findOne({ title: article.title }, function(err, docs) {
+            // 标题一致则更新，否则插入
+            if (docs) {
+              db.Article.update(
+                { _id: docs._id },
+                {
+                  title: article.title,
+                  content: article.content,
+                  tag: article.tag,
+                  date: article.date
+                },
+                function(err, docs) {
+                  res.send("updated " + article.title);
+                }
+              );
             } else {
-              res.sendStatus(200);
+              article.save(function(err, doc) {
+                if (err) {
+                  res.send(err);
+                } else {
+                  res.send("saved " + article.title);
+                }
+              });
             }
           });
         }),
@@ -101,39 +131,31 @@ const devWebpackConfig = merge(baseWebpackConfig, {
          * 根据id查询单篇文章
          */
         app.get("/api/article/:id", function(req, res) {
-          db.Article.findOne(
-            {
-              _id: req.params.id
-            },
-            function(err, docs) {
-              db.Article.update(
-                { _id: req.params.id },
-                { view: docs.view + 1 }
-              );
-              if (err) return;
-              res.send(docs);
-            }
-          );
+          db.Article.findById(req.params.id, function(err, docs) {
+            db.Article.update({ _id: req.params.id }, { view: docs.view + 1 });
+            if (err) return;
+            res.send(docs);
+          });
         }),
         /**
-         * 点赞路由
+         * 删除文章
          */
+        app.get("/api/remove/:id", function(req, res) {
+          db.Article.findByIdAndRemove(req.params.id, function(err, docs) {
+            res.send(docs);
+          });
+        });
+      /**
+       * 点赞路由
+       */
 
-        app.get("/api/like/:id", function(req, res) {
-          db.Article.findOne(
-            {
-              _id: req.params.id
-            },
-            function(err, docs) {
-              docs.like++;
-              db.Article.update(
-                { _id: req.params.id },
-                { like: docs.like }
-              );
-              if (err) return;
-            }
-          );
-        }),
+      app.get("/api/like/:id", function(req, res) {
+        db.Article.findById(req.params.id, function(err, docs) {
+          docs.like++;
+          db.Article.update({ _id: req.params.id }, { like: docs.like });
+          if (err) return;
+        });
+      }),
         app.get("/api/unlike/:id", function(req, res) {
           db.Article.findOne(
             {
@@ -141,10 +163,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
             },
             function(err, docs) {
               docs.like--;
-              db.Article.update(
-                { _id: req.params.id },
-                { like: docs.like },
-              );
+              db.Article.update({ _id: req.params.id }, { like: docs.like });
               if (err) return;
             }
           );
