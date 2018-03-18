@@ -22,7 +22,7 @@ export default {
         document.body.scrollTop || document.documentElement.scrollTop;
       let id = setInterval(() => {
         if (scroll > 0) {
-          scroll -= Math.floor(height / 6);
+          scroll -= Math.floor(height / 10);
           document.body.scrollTop = scroll;
           document.documentElement.scrollTop = scroll;
         } else {

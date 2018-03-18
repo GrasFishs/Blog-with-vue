@@ -1,38 +1,44 @@
 <!-- 文章的细节 -->
 <template>
   <div class="article">
-      <div v-if="!loaded">
-        <Loading/>
+    <div v-if="!loaded">
+      <Loading/>
+    </div>
+    <div v-if="loaded">
+      <h1 class="title">{{article.title}}</h1>
+      <ul class="info">
+        <li class="tag">
+          <Tag :tag="article.tag"/>
+        </li>
+        <li class="date">
+          <i class="far fa-clock"></i>{{article.date |formatDate}}</li>
+        <li class="like">
+          <i class="far fa-heart"></i>({{article.like}})</li>
+        <li class="view">
+          <i class="fa fa-eye"></i>({{article.view}})</li>
+      </ul>
+      <div class="content" v-markdown="'page'" v-html="content"></div>
+      <div class="like-button" @click="like">
+        <span>喜欢</span>
+        <span :class="[likeState?'far fa-heart':'fa fa-heart']"></span>
+        <span>({{article.like}})</span>
       </div>
-      <div v-if="loaded">
-        <div v-for="(item,index) of list" :key="index">
-          <h1 class="title">{{item.title}}</h1>
-          <ul class="info">
-            <li class="date"><i class="far fa-clock"></i>{{item.date}}</li>
-            <li class="like"><i class="far fa-heart"></i>({{item.like}})</li>
-            <li class="view"><i class="fa fa-eye"></i>({{item.view}})</li>
-          </ul>
-          <div class="content" v-markdown="'page'" v-html="content"></div>
-          <div class="like-button" @click="like">
-            <span>喜欢</span>
-            <span :class="[likeState?'far fa-heart':'fa fa-heart']"></span>
-            <span>({{item.like}})</span>
-          </div>
-        </div>
-      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import marked from "marked";
 import Loading from "./Loading";
+import Tag from './Tag';
 export default {
   components: {
-    Loading
+    Loading,
+    Tag
   },
   data() {
     return {
-      list: [],
+      article: null,
       likeState: 0
     };
   },
@@ -43,10 +49,10 @@ export default {
   },
   computed: {
     content: function() {
-      return marked(this.list[0].content);
+      return marked(this.article.content);
     },
     loaded: function() {
-      return this.list.length !== 0;
+      return this.article !== null;
     }
   },
 
@@ -55,19 +61,18 @@ export default {
       setTimeout(() => {
         const self = this;
         this.$http.get("/api/article/" + id).then(res => {
-          self.list = [];
-          self.list.push(res.data);
+          self.article = res.data;
         });
       }, 500);
     },
     like: function() {
       const id = this.$route.params.id;
       if (this.likeState === 0) {
-        this.list[0].like += 1;
+        this.article.like += 1;
         this.likeState = 1;
         this.$http.get("/api/like/" + id);
       } else if (this.likeState === 1) {
-        this.list[0].like -= 1;
+        this.article.like -= 1;
         this.likeState = 0;
         this.$http.get("/api/unlike/" + id);
       }

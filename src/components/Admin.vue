@@ -29,7 +29,15 @@
       </thead>
       <tbody>
         <tr v-for="(article,i) of articles" :key="i">
-          <td>{{article.title}}</td>
+          <td><router-link class="title"
+            :to="{
+              name:'article',
+              params:{
+                tag:article.tag,
+                id:article._id,
+              }}">
+            {{article.title}}
+          </router-link></td>
           <td><Tag :tag="article.tag"/></td>
           <td>{{article.date}}</td>
           <td>{{article.like}}</td>

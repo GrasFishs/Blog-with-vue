@@ -6,6 +6,7 @@ import router from "./router";
 import store from "./vuex/store";
 import axios from "axios";
 import { markdown } from "./directives/markdown";
+import { formatDate } from "./filters/formatDate";
 import "font-awesome/css/font-awesome.css";
 
 Vue.config.productionTip = false;

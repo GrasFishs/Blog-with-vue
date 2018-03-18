@@ -14,8 +14,8 @@
 export default {
   data() {
     return {
-      name: "",
-      pwd: "",
+      name: "grasfish",
+      pwd: "gotoAnd123",
       error: ""
     };
   },

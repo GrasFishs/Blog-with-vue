@@ -6,17 +6,13 @@
         <input type="text" v-model="title" v-focus>
       </div>
       <div class="tagSelector">
-        <div class="tag" 
-              v-for="tag of tags" 
-              :key="tag.name"
-              :class="tag.select?'select':''"
-              @click="select(tag)">
+        <div class="tag" v-for="tag of tags" :key="tag.name" :class="tag.select?'select':''" @click="select(tag)">
           {{tag.name}}
         </div>
       </div>
     </div>
     <div class="content">
-      <textarea class="edit" v-model="content"></textarea>
+      <textarea class="edit" v-model="content" ref="area"></textarea>
       <div class="show" v-html="markdown"></div>
     </div>
     <div class="save">
@@ -27,7 +23,6 @@
 </template>
 
 <script>
-
 import marked from "marked";
 import Tag from "./Tag";
 
@@ -65,6 +60,54 @@ export default {
           };
         } else {
           return { name: tag, select: false };
+        }
+      }
+    });
+  },
+  mounted() {
+    const area = this.$refs.area;
+    const self = this;
+
+    area.addEventListener("paste", function(e) {
+      // 通过获取选择的范围，插入图片
+      const selection = area.selectionStart;
+      // 剪贴板事件
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      for (const key in items) {
+        const item = items[key];
+        const type = item.type;
+        // 剪贴的类型是否为 image
+        if (type && type.split("/")[0] === "image") {
+          const imgSuffix = type.split("/")[1]; //图片后缀
+          const file = item.getAsFile(); //获取base64的图片格式
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = function(event) {
+            const base64 = event.currentTarget.result;
+            const imgName =
+              base64
+                .split("base64,")[1]
+                .replace(/\W/gi, "")
+                .slice(-20) +
+              "." +
+              imgSuffix; //采取倒数20的字符
+            let form = new FormData();
+            form.append("image", file, imgName);
+            self
+              .$http({
+                url: "/upload",
+                method: "post",
+                data: form,
+                headers: { "Content-Type": "multipart/form-data" }
+              })
+              .then(res => {
+                const img = `![image.${imgSuffix}](${res.data})`;
+                self.content =
+                  self.content.slice(0, selection) +
+                  img +
+                  self.content.slice(selection);
+              });
+          };
         }
       }
     });
@@ -108,7 +151,8 @@ export default {
         tag: this.tag,
         date: this.$store.state.article.date || new Date(),
         like: 0,
-        view: 0
+        view: 0,
+        cover: this.getCover(this.content)
       };
       this.$http
         .post("/api/saveArticle", {
@@ -135,6 +179,14 @@ export default {
         }
       }
       this.tags = newTags;
+    },
+    getCover: function(content) {
+      let div = document.createElement("div");
+      if (typeof content === "string") {
+        div.innerHTML = marked(content);
+      }
+      let cover = div.querySelector("img").getAttribute("src");
+      return cover;
     }
   }
 };

@@ -4,12 +4,14 @@ const webpack = require("webpack");
 const config = require("../config");
 const merge = require("webpack-merge");
 const path = require("path");
+const fs = require("fs");
 const baseWebpackConfig = require("./webpack.base.conf");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const FriendlyErrorsPlugin = require("friendly-errors-webpack-plugin");
 const portfinder = require("portfinder");
-const app = require("express")();
+const express = require("express");
+const app = express();
 var bodyParser = require("body-parser");
 var multer = require("multer");
 const db = require("./db");
@@ -62,112 +64,173 @@ const devWebpackConfig = merge(baseWebpackConfig, {
        * 获取所有的文章列表
        */
       app.get("/api/articleList", function(req, res) {
-        db.Article.find({}, function(err, docs) {
-          if (err) {
-            console.log("find articleList error:" + err);
-            return;
-          }
-          res.send(docs);
-        });
-      }),
-        app.get("/api/articleList/:tag", function(req, res) {
-          db.Article.find(
-            {
-              tag: req.params.tag
-            },
-            function(err, docs) {
-              if (err) {
-                console.log("find articleList error:" + err);
-                return;
-              }
+        db.Article.find({})
+          .sort({ _id: -1 })
+          .exec(function(err, docs) {
+            if (err) {
+              console.log("find articleList error:" + err);
+              return;
+            }
+            res.send(docs);
+          });
+      });
+      const SKIP = 3;
+      app.post("/api/articleList", function(req, res) {
+        const page = req.body.page;
+        db.Article.find({})
+          .sort({ _id: -1 })
+          .limit(SKIP)
+          .skip(SKIP * page)
+          .exec(function(err, docs) {
+            if (err) {
+              console.log("find articleList error:" + err);
+              return;
+            }
+            if (docs) {
               res.send(docs);
             }
-          );
-        }),
-        /**
-         * 登录
-         */
-        app.post("/login", function(req, res) {
-          const un = req.body.username;
-          const pwd = req.body.password;
-          if (un === "grasfish" && pwd === "gotoAnd123") {
-            res.send("OK");
-          } else {
-            res.send("BAD");
-          }
-        }),
-        /**
-         * 上传文章
-         */
-        app.post("/api/saveArticle", function(req, res) {
-          const article = new db.Article(req.body.article);
-          db.Article.findOne({ title: article.title }, function(err, docs) {
-            // 标题一致则更新，否则插入
+          });
+      });
+      app.post("/api/articleList/:tag", function(req, res) {
+        const page = req.body.page;
+        db.Article.find({ tag: req.params.tag })
+          .sort({ _id: -1 })
+          .limit(SKIP)
+          .skip(SKIP * page)
+          .exec(function(err, docs) {
+            if (err) {
+              console.log("find articleList error:" + err);
+              return;
+            }
             if (docs) {
-              db.Article.update(
-                { _id: docs._id },
-                {
-                  title: article.title,
-                  content: article.content,
-                  tag: article.tag,
-                  date: article.date
-                },
-                function(err, docs) {
-                  res.send("updated " + article.title);
-                }
-              );
-            } else {
-              article.save(function(err, doc) {
-                if (err) {
-                  res.send(err);
-                } else {
-                  res.send("saved " + article.title);
-                }
-              });
+              res.send(docs);
             }
           });
-        }),
-        /**
-         * 根据id查询单篇文章
-         */
-        app.get("/api/article/:id", function(req, res) {
-          db.Article.findById(req.params.id, function(err, docs) {
-            db.Article.update({ _id: req.params.id }, { view: docs.view + 1 });
-            if (err) return;
-            res.send(docs);
-          });
-        }),
-        /**
-         * 删除文章
-         */
-        app.get("/api/remove/:id", function(req, res) {
-          db.Article.findByIdAndRemove(req.params.id, function(err, docs) {
-            res.send(docs);
+      });
+      /**
+       * 登录
+       */
+      app.post("/login", function(req, res) {
+        const un = req.body.username;
+        const pwd = req.body.password;
+        if (un === "grasfish" && pwd === "gotoAnd123") {
+          res.send("OK");
+        } else {
+          res.send("BAD");
+        }
+      });
+      /**
+       * 上传文章
+       */
+      app.post("/api/saveArticle", function(req, res) {
+        const article = new db.Article(req.body.article);
+        db.Article.findOne({ title: article.title }, function(err, docs) {
+          // 标题一致则更新，否则插入
+          if (docs) {
+            db.Article.update(
+              { _id: docs._id },
+              {
+                title: article.title,
+                content: article.content,
+                tag: article.tag,
+                date: article.date,
+                cover: article.cover
+              },
+              function(err, docs) {
+                res.send("updated " + article.title);
+              }
+            );
+          } else {
+            article.save(function(err, doc) {
+              if (err) {
+                res.send(err);
+              } else {
+                res.send("saved " + article.title);
+              }
+            });
+          }
+        });
+      });
+
+      /**
+       * 上传图片
+       */
+      app.use(express.static(path.join(__dirname, "images")));
+      app.post("/upload", function(req, res) {
+        console.log(req.ip);
+        const file = req.files.image;
+        console.log(file.originalname + " load");
+        const des_file = __dirname + "/images/" + file.originalname;
+        fs.readFile(file.path, function(err, data) {
+          fs.writeFile(des_file, data, function(err) {
+            if (err) console.log(err);
+            else {
+              res.send(req.headers.origin + "/" + file.originalname);
+            }
           });
         });
+      });
+      /**
+       * 根据id查询单篇文章
+       */
+      app.get("/api/article/:id", function(req, res) {
+        const id = req.params.id;
+        db.Article.findById(id, function(err, docs) {
+          if (err) console.log(err);
+          else if (docs) {
+            res.send(docs);
+            db.Article.update({ _id: id }, { view: docs.view + 1 }, function(
+              err,
+              up
+            ) {
+              if (err) console.log(err);
+            });
+          }
+        });
+      });
+      /**
+       * 删除文章
+       */
+      app.get("/api/remove/:id", function(req, res) {
+        db.Article.findByIdAndRemove(req.params.id, function(err, docs) {
+          if (err) console.log(err);
+          else res.send(docs);
+        });
+      });
       /**
        * 点赞路由
        */
 
       app.get("/api/like/:id", function(req, res) {
-        db.Article.findById(req.params.id, function(err, docs) {
-          docs.like++;
-          db.Article.update({ _id: req.params.id }, { like: docs.like });
-          if (err) return;
+        const id = req.params.id;
+        db.Article.findById(id, function(err, docs) {
+          if (err) console.log(err);
+          else if (docs) {
+            res.send(docs);
+            db.Article.update({ _id: id }, { like: docs.like + 1 }, function(
+              err,
+              up
+            ) {
+              if (err) console.log(err);
+            });
+          }
         });
-      }),
-        app.get("/api/unlike/:id", function(req, res) {
-          db.Article.findOne(
-            {
-              _id: req.params.id
-            },
-            function(err, docs) {
-              docs.like--;
-              db.Article.update({ _id: req.params.id }, { like: docs.like });
-              if (err) return;
-            }
-          );
+      });
+      app.get("/api/unlike/:id", function(req, res) {
+        const id = req.params.id;
+        db.Article.findById(id, function(err, docs) {
+          if (err) console.log(err);
+          else if (docs) {
+            res.send(docs);
+            db.Article.update({ _id: id }, { like: docs.like - 1 }, function(
+              err,
+              up
+            ) {
+              if (err) console.log(err);
+            });
+          }
         });
+      });
     }
   },
   plugins: [
