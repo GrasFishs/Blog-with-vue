@@ -5,7 +5,7 @@
       <Loading/>
     </div>
     <div v-if="loaded">
-      <div class="page" v-for="article of articles" :key="article._id">
+      <div class="page" v-for="article of articles" :key="article._id" v-if="!article.draft">
         <div class="left">
           <div class="header">
             <router-link class="title" :to="{
@@ -163,7 +163,9 @@ export default {
         /*显示三行内容，多余的用...替代*/
         overflow: hidden;
         display: -webkit-box;
+        /*! autoprefixer: off */
         -webkit-box-orient: vertical;
+        /* autoprefixer: on */
         -webkit-line-clamp: 3;
         text-overflow: ellipsis;
         color: #2c3e50;

@@ -188,7 +188,7 @@ export default {
       let cover = div.querySelector("img").getAttribute("src");
       return cover;
     }
-  }
+  },
 };
 </script>
 <style lang='scss' scoped>

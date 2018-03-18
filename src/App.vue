@@ -3,7 +3,7 @@
     <Navbar/>
     <div class="main">
       <transition :name="transitionName">
-       <router-view class="child-view"/>
+          <router-view class="child-view"/>
       </transition>
     </div>
     <ToTop />

@@ -39,11 +39,11 @@ const router = new Router({
       component: Login
     },
     {
-      path: "/admin/editor",
-      name: "editor",
+      path: "/admin/editor/:id",
+      name: "editorWithId",
       component: Ediotr,
       meta: {
-        requireAuth: true
+        requireAuth: true,
       }
     }
   ]

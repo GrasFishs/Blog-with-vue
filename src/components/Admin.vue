@@ -5,15 +5,15 @@
       <div class="card">
         <div class="likes">
           <i class="fas fa-heart"></i>
-          <Countup :end="likes" :duration="4"/>
+          <Countup :end="likes" :duration="4" />
         </div>
       </div>
-    <div class="card">
-      <div class="views">
-        <i class="fa fa-eye"></i>
-        <Countup :end="views" :duration="5"/>
+      <div class="card">
+        <div class="views">
+          <i class="fa fa-eye"></i>
+          <Countup :end="views" :duration="5" />
+        </div>
       </div>
-    </div>
     </div>
     <table>
       <thead>
@@ -29,16 +29,19 @@
       </thead>
       <tbody>
         <tr v-for="(article,i) of articles" :key="i">
-          <td><router-link class="title"
-            :to="{
+          <td>
+            <router-link class="title" :to="{
               name:'article',
               params:{
                 tag:article.tag,
                 id:article._id,
               }}">
-            {{article.title}}
-          </router-link></td>
-          <td><Tag :tag="article.tag"/></td>
+              {{article.title}}
+            </router-link>
+          </td>
+          <td>
+            <Tag :tag="article.tag" />
+          </td>
           <td>{{article.date}}</td>
           <td>{{article.like}}</td>
           <td>{{article.view}}</td>
@@ -110,7 +113,7 @@ export default {
     },
     edit(article) {
       this.$store.state.article = article;
-      this.$router.push({ name: "editor" });
+      this.$router.push({ name: "editorWithId", params: { id: article.id } });
     },
     addArticle() {
       this.$store.state.article = {};

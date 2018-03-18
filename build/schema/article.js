@@ -10,7 +10,8 @@ const ArticleSchema = new Schema({
   content: String,
   tag: String,
   cover: String,
-  tag: String
+  tag: String,
+  draft: Boolean
 });
 
 module.exports = ArticleSchema;
