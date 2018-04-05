@@ -151,6 +151,42 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           }
         });
       });
+      /**
+       * 上传评论
+       */
+      app.post("/api/saveComment", function(req, res) {
+        const comment = new db.Comment(req.body.comment);
+        comment.save(function(err, doc) {
+          if (err) {
+            res.send(err);
+          } else {
+            res.send(comment);
+          }
+        });
+        db.Article.findById(req.body.comment.articleId, function(err, docs) {
+          if (err) console.log(err);
+          db.Article.update(
+            { _id: docs.id },
+            { comment: docs.comment + 1 },
+            function(err, up) {
+              if (err) console.log(err);
+            }
+          );
+        });
+      });
+      /**
+       * 获取评论列表
+       */
+      app.get("/api/comments/:id", function(req, res) {
+        const id = req.params.id;
+        db.Comment.find({ articleId: id }, function(err, docs) {
+          if (err) {
+            res.send(err);
+          } else {
+            res.send(docs);
+          }
+        });
+      });
 
       /**
        * 上传图片

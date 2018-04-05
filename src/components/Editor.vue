@@ -18,7 +18,6 @@
     <div class="save">
       <button @click="save">提交</button>
     </div>
-    <div class="state">{{state}}</div>
   </div>
 </template>
 
@@ -118,7 +117,6 @@ export default {
       title: this.$store.state.article.title || new Date().toLocaleDateString(),
       tag: this.$store.state.article.tag || "other",
       content: this.$store.state.article.content || "",
-      state: "",
       w: ""
     };
   },
@@ -142,7 +140,8 @@ export default {
     save: function() {
       let self = this;
       if (!this.title || !this.content) {
-        alert("不能为空");
+        this.$message.error("内容不能为空哦");
+
         return;
       }
       const postarticle = {
@@ -152,6 +151,7 @@ export default {
         date: this.$store.state.article.date || new Date(),
         like: 0,
         view: 0,
+        comment: 0,
         cover: this.getCover(this.content)
       };
       this.$http
@@ -159,7 +159,13 @@ export default {
           article: postarticle
         })
         .then(res => {
-          self.state = res.data; //return 'OK'
+          let date = new Date();
+          this.$message({
+            message: `${
+              res.data
+            } at ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`,
+            type: "success"
+          });
         });
     },
     select: function(tag) {
@@ -185,10 +191,10 @@ export default {
       if (typeof content === "string") {
         div.innerHTML = marked(content);
       }
-      let cover = div.querySelector("img").getAttribute("src");
-      return cover;
+      let cover = div.querySelector("img");
+      return cover ? cover.getAttribute("src") : null;
     }
-  },
+  }
 };
 </script>
 <style lang='scss' scoped>

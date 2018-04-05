@@ -104,6 +104,7 @@ blockquote {
   padding-left: 20px;
   border-left: #c7254e 10px solid;
   margin-left: 0px;
+  overflow: auto;
 }
 
 code{
@@ -111,6 +112,7 @@ code{
   padding: 2px 4px;
   background: #f2f6f9;
   border-radius: 3px;
+  overflow: auto;
 }
 
 pre {
@@ -119,4 +121,5 @@ pre {
   padding: 10px;
   border: 1px solid lightgray;
   transition: ease 0.2s;
+  overflow: auto;
 }

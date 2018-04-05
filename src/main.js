@@ -9,8 +9,16 @@ import { markdown } from "./directives/markdown";
 import { formatDate } from "./filters/formatDate";
 import "font-awesome/css/font-awesome.css";
 
+import 'element-ui/lib/theme-chalk/index.css';
+import { MessageBox, Message } from "element-ui";
+
 Vue.config.productionTip = false;
+
+Vue.use(MessageBox.name, MessageBox);
 Vue.prototype.$http = axios;
+Vue.prototype.$alert = MessageBox.alert;
+Vue.prototype.$confirm = MessageBox.confirm;
+Vue.prototype.$message = Message;
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth) {

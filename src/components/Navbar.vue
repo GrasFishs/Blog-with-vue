@@ -28,7 +28,7 @@ $stickyHeight: 75px;
 .info {
   font-size: 24px;
   color: #fff;
-
+  z-index: 1000;
   .avatar {
     background: #fff;
     border-radius: 50%;

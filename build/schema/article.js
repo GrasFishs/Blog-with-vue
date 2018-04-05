@@ -5,13 +5,12 @@ const ArticleSchema = new Schema({
   title: String,
   username: String,
   date: Date,
-  likes: Number,
-  views: Number,
+  like: Number,
+  view: Number,
+  comment:Number,
   content: String,
   tag: String,
-  cover: String,
-  tag: String,
-  draft: Boolean
+  cover: String
 });
 
 module.exports = ArticleSchema;

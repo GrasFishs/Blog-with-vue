@@ -30,6 +30,8 @@
               <i class="icon far fa-heart"></i>{{article.like}}</div>
             <div class="view">
               <i class="icon fa fa-eye"></i>{{article.view}}</div>
+            <div class="comment">
+              <i class="fas fa-comments"></i>{{article.comment}}</div>
           </div>
         </div>
         <div class="right" v-if="article.cover">
@@ -221,6 +223,9 @@ export default {
 
       .view {
         color: gray;
+      }
+      .comment{
+        color: #35bbb4;
       }
     }
   }

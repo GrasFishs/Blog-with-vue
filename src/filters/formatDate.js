@@ -17,11 +17,6 @@ Vue.filter("formatDate", function(date) {
   minute = formatNumber(minute);
   second = formatNumber(second);
 
-  let now = new Date().getFullYear();
-  if (now === year) {
-    return [month, day].join(".") + " " + [hour, minute, second].join(":");
-  } else {
-    return [year, month, day].join(".") + [hour, minute, second].join(":");
-  }
+  return [year, month, day].join("-") + " " + [hour, minute, second].join(":");
 });
 export { formateDate };

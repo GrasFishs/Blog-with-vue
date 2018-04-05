@@ -42,16 +42,16 @@
           <td>
             <Tag :tag="article.tag" />
           </td>
-          <td>{{article.date}}</td>
+          <td>{{article.date|formatDate}}</td>
           <td>{{article.like}}</td>
           <td>{{article.view}}</td>
           <td>
-            <div @click="edit(article)">
+            <div @click="edit(article)" style="color:rgb(59, 120, 167);">
               <i class="fas fa-pencil-alt"></i>
             </div>
           </td>
           <td>
-            <div @click="remove(article._id)">
+            <div @click="remove(article._id)" style="color:rgb(230, 42, 57);">
               <i class="fas fa-trash-alt"></i>
             </div>
           </td>
@@ -113,20 +113,32 @@ export default {
     },
     edit(article) {
       this.$store.state.article = article;
-      this.$router.push({ name: "editorWithId", params: { id: article.id } });
+      this.$router.push({ name: "editor" });
     },
     addArticle() {
       this.$store.state.article = {};
       this.$router.push({ name: "editor" });
     },
     remove(id) {
-      const del = confirm("确定删除吗？");
-      if (del) {
-        this.$http.get("/api/remove/" + id).then(res => {
-          alert(JSON.stringify(res.data));
-          this.fetchData();
+      this.$confirm("确定删除本文章吗？", "警告", {
+        confirmButtonText: "删除",
+        cancelButtonText: "取消"
+      })
+        .then(() => {
+          this.$http.get("/api/remove/" + id).then(res => {
+            this.fetchData();
+            this.$message({
+              type: "success",
+              message: `删除成功！` 
+            });
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
         });
-      }
     }
   }
 };

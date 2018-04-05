@@ -8,7 +8,7 @@
       <h1 class="title">{{article.title}}</h1>
       <ul class="info">
         <li class="tag">
-          <Tag :tag="article.tag"/>
+          <Tag :tag="article.tag" />
         </li>
         <li class="date">
           <i class="far fa-clock"></i>{{article.date |formatDate}}</li>
@@ -16,12 +16,17 @@
           <i class="far fa-heart"></i>({{article.like}})</li>
         <li class="view">
           <i class="fa fa-eye"></i>({{article.view}})</li>
+        <li class="comment">
+          <i class="fas fa-comments"></i>({{article.comment}})</li>
       </ul>
       <div class="content" v-markdown="'page'" v-html="content"></div>
       <div class="like-button" @click="like">
         <span>喜欢</span>
         <span :class="[likeState?'far fa-heart':'fa fa-heart']"></span>
         <span>({{article.like}})</span>
+      </div>
+      <div class="commentsList">
+        <CommentsList :articleId="this.$route.params.id" />
       </div>
     </div>
   </div>
@@ -30,11 +35,13 @@
 <script>
 import marked from "marked";
 import Loading from "./Loading";
-import Tag from './Tag';
+import Tag from "./Tag";
+import CommentsList from "./CommentsList";
 export default {
   components: {
     Loading,
-    Tag
+    Tag,
+    CommentsList
   },
   data() {
     return {
@@ -107,6 +114,9 @@ export default {
 
       &.view {
         color: gray;
+      }
+      &.comment{
+        color: #35bbb4;
       }
     }
   }

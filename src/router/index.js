@@ -39,8 +39,8 @@ const router = new Router({
       component: Login
     },
     {
-      path: "/admin/editor/:id",
-      name: "editorWithId",
+      path: "/admin/editor/",
+      name: "editor",
       component: Ediotr,
       meta: {
         requireAuth: true,
