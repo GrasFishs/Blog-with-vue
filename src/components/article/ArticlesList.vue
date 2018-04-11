@@ -5,7 +5,7 @@
       <Loading/>
     </div>
     <div v-if="loaded">
-      <div class="page" v-for="article of articles" :key="article._id" v-if="!article.draft">
+      <div class="page" v-for="article of articles" :key="article._id">
         <div class="left">
           <div class="header">
             <router-link class="title" :to="{
@@ -21,9 +21,9 @@
             <div class="content" v-markdown="'card'">{{article.content}}</div>
           </div>
           <div class="footer">
-            <div class="tag">
-              {{article.tag}}
-            </div>
+            <router-link :to="{name:'ArticleList',params:{tag:article.tag}}">
+              <div class="tag">{{article.tag}}</div>
+            </router-link>
             <div class="date">
               <i class="icon far fa-clock"></i>{{article.date | formatDate}}</div>
             <div class="like">
@@ -48,9 +48,7 @@
 </template>
 
 <script>
-import Tag from "./Tag";
-import TagList from "./TagList";
-import Loading from "./Loading";
+import { Tag, TagList, Loading } from "../tools";
 export default {
   components: {
     Tag,
@@ -61,7 +59,6 @@ export default {
     return {
       articles: [],
       noArticles: false,
-      oldLength: 0,
       page: 0
     };
   },
@@ -112,9 +109,6 @@ export default {
           });
       }
       this.page++;
-    },
-    formatDate: function(date) {
-      return new Date(date);
     }
   },
   mounted() {
@@ -224,7 +218,7 @@ export default {
       .view {
         color: gray;
       }
-      .comment{
+      .comment {
         color: #35bbb4;
       }
     }

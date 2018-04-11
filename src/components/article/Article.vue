@@ -34,8 +34,8 @@
 
 <script>
 import marked from "marked";
-import Loading from "./Loading";
-import Tag from "./Tag";
+import Loading from "../tools/Loading";
+import Tag from "../tools/Tag";
 import CommentsList from "./CommentsList";
 export default {
   components: {
@@ -66,9 +66,8 @@ export default {
   methods: {
     fetchData: function(id) {
       setTimeout(() => {
-        const self = this;
         this.$http.get("/api/article/" + id).then(res => {
-          self.article = res.data;
+          this.article = res.data[0];
         });
       }, 500);
     },
@@ -115,7 +114,7 @@ export default {
       &.view {
         color: gray;
       }
-      &.comment{
+      &.comment {
         color: #35bbb4;
       }
     }

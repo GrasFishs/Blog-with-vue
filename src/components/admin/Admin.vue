@@ -14,6 +14,12 @@
           <Countup :end="views" :duration="5" />
         </div>
       </div>
+      <div class="card">
+        <div class="comments">
+          <i class="fas fa-comments"></i>
+          <Countup :end="comments" :duration="5" />
+        </div>
+      </div>
     </div>
     <table>
       <thead>
@@ -23,6 +29,7 @@
           <th>日期</th>
           <th>点赞</th>
           <th>访问量</th>
+          <th>评论量</th>
           <th>编辑</th>
           <th>删除</th>
         </tr>
@@ -45,6 +52,7 @@
           <td>{{article.date|formatDate}}</td>
           <td>{{article.like}}</td>
           <td>{{article.view}}</td>
+          <td>{{article.comment}}</td>
           <td>
             <div @click="edit(article)" style="color:rgb(59, 120, 167);">
               <i class="fas fa-pencil-alt"></i>
@@ -57,7 +65,7 @@
           </td>
         </tr>
         <tr>
-          <td colspan="7">
+          <td colspan="8">
             <div class="addArticle">
               <button @click="addArticle">添加文章</button>
             </div>
@@ -69,8 +77,8 @@
 </template>
 
 <script>
-import Tag from "./Tag";
-import Countup from "./Countup";
+import Tag from "../tools/Tag";
+import Countup from "../tools/Countup";
 export default {
   data() {
     return {
@@ -95,6 +103,15 @@ export default {
       if (this.articles.length !== 0) {
         return this.articles
           .map(i => i.view)
+          .reduce((total, cur) => total + cur);
+      } else {
+        return 0;
+      }
+    },
+    comments: function() {
+      if (this.articles.length !== 0) {
+        return this.articles
+          .map(i => i.comment)
           .reduce((total, cur) => total + cur);
       } else {
         return 0;
@@ -129,7 +146,7 @@ export default {
             this.fetchData();
             this.$message({
               type: "success",
-              message: `删除成功！` 
+              message: `删除成功！`
             });
           });
         })
@@ -161,8 +178,12 @@ export default {
     .views {
       color: rgb(59, 120, 167);
     }
+    .comments {
+      color: #35bbb4;
+    }
     .views,
-    .likes {
+    .likes,
+    .comments {
       display: flex;
       flex-direction: column;
       align-items: center;

@@ -22,7 +22,6 @@ Vue.prototype.$message = Message;
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth) {
-    // console.log(isEmptyObject(store.state.user))
     if (store.state.user.status === 1) {
       next();
     } else {

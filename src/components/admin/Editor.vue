@@ -23,7 +23,6 @@
 
 <script>
 import marked from "marked";
-import Tag from "./Tag";
 
 const tagsList = [
   "javascript",
@@ -37,9 +36,6 @@ const tagsList = [
   "other"
 ];
 export default {
-  components: {
-    Tag
-  },
   created() {
     this.tags = tagsList.map(tag => {
       if (this.$store.state.article) {

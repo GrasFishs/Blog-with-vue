@@ -12,7 +12,7 @@
 
 <script>
 import Navbar from "./components/Navbar";
-import ToTop from "./components/ToTop";
+import {ToTop} from "./components/tools";
 export default {
   components: {
     ToTop,

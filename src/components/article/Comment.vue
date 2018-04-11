@@ -59,7 +59,6 @@ export default {
               message: '提交评论成功！',
               type: "success"
             });
-            console.log(res.data);
           });
         this.$emit("comment", comment);
       }

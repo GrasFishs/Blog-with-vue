@@ -2,8 +2,9 @@ import Vue from "vue";
 import marked from "marked";
 import highlight from "highlight.js";
 import "./atom-one-light.css";
+import './markdown.css'
 
-const insertAfter = function (newEle, tarEle) {
+const insertAfter = function(newEle, tarEle) {
   const parent = tarEle.parentNode;
   if (parent.lastChild == tarEle) {
     parent.appendChild(newEle);
@@ -11,8 +12,12 @@ const insertAfter = function (newEle, tarEle) {
     parent.insertBefore(newEle, tarEle.nextSibling);
   }
 };
+/**
+ * 将图片包装在一个div里
+ * 让图片水平居中并显示alt信息
+ */
 
-const wrap = function (img) {
+const wrap = function(img) {
   let wrapper = document.createElement("div");
   let parent = img.parentNode;
   const imgAlt = document.createElement("div");
@@ -28,23 +33,17 @@ const wrap = function (img) {
   }
 };
 
+/**
+ * 点击图片后弹出放大的图片
+ */
+
 const showPic = img => {
   document.body.style.overflow = "hidden"; //禁止滚动
   const imgClone = img.cloneNode(false);
-  imgClone.style.transition = '0.2s all ease';
+  imgClone.style.transition = "0.2s all ease";
   let clickCount = 0;
   let wrapper = document.createElement("div");
-  wrapper.style.position = "fixed";
-  wrapper.style.top = "0";
-  wrapper.style.bottom = "0";
-  wrapper.style.left = "0";
-  wrapper.style.right = "0";
-  wrapper.style.width = "100%";
-  wrapper.style.height = "100%";
-  wrapper.style.backgroundColor = "rgba(0,0,0,0.8)";
-  wrapper.style.display = "flex";
-  wrapper.style.justifyContent = "center";
-  wrapper.style.alignItems = "center";
+  wrapper.classList.add('imgWrapper');
   wrapper.addEventListener("click", e => {
     if (e.target === wrapper) {
       document.body.removeChild(wrapper);
@@ -56,22 +55,26 @@ const showPic = img => {
 };
 
 const markdown = Vue.directive("markdown", {
-  bind: function (el, binding) {
+  bind: function(el, binding) {
     marked.setOptions({
       renderer: new marked.Renderer(),
-      gfm: true,
-      tables: true,
-      breaks: false,
-      pedantic: false,
-      sanitize: false,
-      smartLists: true,
-      smartypants: false,
-      highlight: function (code) {
+      gfm: true, //git hub标准的markdown
+      tables: true, //表格语法
+      breaks: false, //允许回车换行
+      pedantic: false, //尽可能地兼容 markdown.pl的晦涩部分。不纠正原始模型任何的不良行为和错误。
+      sanitize: false, //对输出进行过滤（清理），将忽略任何已经输入的html代码（标签）
+      smartLists: true, //用比原生markdown更时髦的列表。 旧的列表将可能被作为pedantic的处理内容过滤掉.
+      smartypants: false, //使用更为时髦的标点，比如在引用语法中加入破折号。
+      highlight: function(code) {
         return highlight.highlightAuto(code).value;
       }
     });
     el.innerHTML = marked(el.innerHTML);
     if (binding.value === "page") {
+      //详细文章页
+      /**
+       * 图片的大小根据屏幕的大小进行约束。
+       */
       const imgList = el.querySelectorAll("img");
       const windowWidth = window.innerWidth;
       const MINWIDTH =
@@ -88,21 +91,11 @@ const markdown = Vue.directive("markdown", {
         });
         wrap(img);
       }
-    } else if (binding.value === "image") {
-      const firstImg = el.querySelector("img");
-      if (firstImg) {
-        firstImg.style.width = "100%";
-        //firstImg.style.transform = "translateY(-50%)";
-        el.innerHTML = firstImg.outerHTML;
-      } else {
-        el.innerHTML = "";
-      }
     } else if (binding.value === "card") {
+      //文章列表显示
       el.innerHTML = el.innerText;
     }
   }
 });
 
-export {
-  markdown
-};
+export { markdown };

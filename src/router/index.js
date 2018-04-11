@@ -1,11 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
-import HelloWorld from "@/components/HelloWorld";
-import ArticleList from "../components/ArticlesList.vue";
-import Article from "../components/Article.vue";
-import Admin from "../components/Admin.vue";
-import Ediotr from "../components/Editor.vue";
-import Login from "../components/Login.vue";
+import { Article, ArticleList } from "../components/article";
+import { Admin, Ediotr, Login } from "../components/admin";
 
 Vue.use(Router);
 
@@ -43,7 +39,7 @@ const router = new Router({
       name: "editor",
       component: Ediotr,
       meta: {
-        requireAuth: true,
+        requireAuth: true
       }
     }
   ]

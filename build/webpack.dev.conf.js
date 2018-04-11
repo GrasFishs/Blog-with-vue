@@ -60,9 +60,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
       app.use(multer()); // for parsing multipart/form-data
 
-      /**
-       * 获取所有的文章列表
-       */
       app.get("/api/articleList", function(req, res) {
         db.Article.find({})
           .sort({ _id: -1 })
@@ -120,6 +117,22 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         }
       });
       /**
+       * 上传图片
+       */
+      app.post("/upload", function(req, res) {
+        const file = req.files.image;
+        console.log(file.originalname + " load");
+        const des_file = "./public/static/img/" + file.originalname;
+        fs.readFile(file.path, function(err, data) {
+          fs.writeFile(des_file, data, function(err) {
+            if (err) console.log(err);
+            else {
+              res.send(req.headers.origin + "/static/img/" + file.originalname);
+            }
+          });
+        });
+      });
+      /**
        * 上传文章
        */
       app.post("/api/saveArticle", function(req, res) {
@@ -127,19 +140,19 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         db.Article.findOne({ title: article.title }, function(err, docs) {
           // 标题一致则更新，否则插入
           if (docs) {
-            db.Article.update(
-              { _id: docs._id },
-              {
-                title: article.title,
-                content: article.content,
-                tag: article.tag,
-                date: article.date,
-                cover: article.cover
-              },
-              function(err, docs) {
+            db.Article.where({ _id: docs._id })
+              .update({
+                $set: {
+                  title: article.title,
+                  content: article.content,
+                  tag: article.tag,
+                  date: article.date,
+                  cover: article.cover
+                }
+              })
+              .exec(function(err, docs) {
                 res.send("updated " + article.title);
-              }
-            );
+              });
           } else {
             article.save(function(err, doc) {
               if (err) {
@@ -152,76 +165,18 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         });
       });
       /**
-       * 上传评论
-       */
-      app.post("/api/saveComment", function(req, res) {
-        const comment = new db.Comment(req.body.comment);
-        comment.save(function(err, doc) {
-          if (err) {
-            res.send(err);
-          } else {
-            res.send(comment);
-          }
-        });
-        db.Article.findById(req.body.comment.articleId, function(err, docs) {
-          if (err) console.log(err);
-          db.Article.update(
-            { _id: docs.id },
-            { comment: docs.comment + 1 },
-            function(err, up) {
-              if (err) console.log(err);
-            }
-          );
-        });
-      });
-      /**
-       * 获取评论列表
-       */
-      app.get("/api/comments/:id", function(req, res) {
-        const id = req.params.id;
-        db.Comment.find({ articleId: id }, function(err, docs) {
-          if (err) {
-            res.send(err);
-          } else {
-            res.send(docs);
-          }
-        });
-      });
-
-      /**
-       * 上传图片
-       */
-      app.use(express.static(path.join(__dirname, "images")));
-      app.post("/upload", function(req, res) {
-        console.log(req.ip);
-        const file = req.files.image;
-        console.log(file.originalname + " load");
-        const des_file = __dirname + "/images/" + file.originalname;
-        fs.readFile(file.path, function(err, data) {
-          fs.writeFile(des_file, data, function(err) {
-            if (err) console.log(err);
-            else {
-              res.send(req.headers.origin + "/" + file.originalname);
-            }
-          });
-        });
-      });
-      /**
        * 根据id查询单篇文章
        */
       app.get("/api/article/:id", function(req, res) {
         const id = req.params.id;
-        db.Article.findById(id, function(err, docs) {
-          if (err) console.log(err);
-          else if (docs) {
-            res.send(docs);
-            db.Article.update({ _id: id }, { view: docs.view + 1 }, function(
-              err,
-              up
-            ) {
-              if (err) console.log(err);
-            });
-          }
+        db.Article.where({ _id: id })
+          .update({ $inc: { view: 1 } })
+          .exec(function(err, doc) {
+            if (err) console.log(err);
+          });
+        db.Article.where({ _id: id }).exec(function(err, docs) {
+          if (err) res.send(err);
+          else res.send(docs);
         });
       });
       /**
@@ -239,31 +194,44 @@ const devWebpackConfig = merge(baseWebpackConfig, {
 
       app.get("/api/like/:id", function(req, res) {
         const id = req.params.id;
-        db.Article.findById(id, function(err, docs) {
-          if (err) console.log(err);
-          else if (docs) {
-            res.send(docs);
-            db.Article.update({ _id: id }, { like: docs.like + 1 }, function(
-              err,
-              up
-            ) {
-              if (err) console.log(err);
-            });
-          }
-        });
+        db.Article.where({ _id: id })
+          .update({ $inc: { like: 1 } })
+          .exec(function(err, doc) {
+            if (err) console.log(err);
+          });
       });
       app.get("/api/unlike/:id", function(req, res) {
         const id = req.params.id;
-        db.Article.findById(id, function(err, docs) {
-          if (err) console.log(err);
-          else if (docs) {
+        db.Article.where({ _id: id })
+          .update({ $inc: { like: -1 } })
+          .exec(function(err, doc) {
+            if (err) console.log(err);
+          });
+      });
+      /**
+       * 上传评论
+       */
+      app.post("/api/saveComment", function(req, res) {
+        const comment = new db.Comment(req.body.comment);
+        comment.save(function(err, doc) {
+          if (err) {
+            res.send(err);
+          } else {
+            db.Article.where({ _id: req.body.comment.articleId })
+              .update({ $inc: { comment: 1 } })
+          }
+        });
+      });
+      /**
+       * 获取评论列表
+       */
+      app.get("/api/comments/:id", function(req, res) {
+        const id = req.params.id;
+        db.Comment.where({ articleId: id }).exec(function(err, docs) {
+          if (err) {
+            res.send(err);
+          } else {
             res.send(docs);
-            db.Article.update({ _id: id }, { like: docs.like - 1 }, function(
-              err,
-              up
-            ) {
-              if (err) console.log(err);
-            });
           }
         });
       });

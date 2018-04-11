@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import Tag from "./Tag";
+import Tag from "../tools/Tag";
 export default {
   components: {
     Tag
